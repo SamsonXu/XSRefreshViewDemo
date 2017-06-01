@@ -40,7 +40,7 @@
 
 + (MyRefreshView *)refreshViewWithScrollView:(UIScrollView *)scrollView{
     MyRefreshView *refreshView = [[MyRefreshView alloc]init];
-    refreshView.frame = CGRectMake(20, -25, KScreenWidth-20, 18);
+    refreshView.frame = CGRectMake(20, 20, KScreenWidth-20, 18);
     refreshView.scrollView = scrollView;
     [refreshView setupView];
     return refreshView;
@@ -67,7 +67,7 @@
     self.activityIndicatorView = [[UIActivityIndicatorView alloc]initWithFrame:CGRectMake(0, 0, 18, 18)];
     [self addSubview:self.activityIndicatorView];
     
-    [self.scrollView addSubview:self];
+//    [self.scrollView addSubview:self];
     
     [self.scrollView addObserver:self forKeyPath:@"contentOffset" options:NSKeyValueObservingOptionOld|NSKeyValueObservingOptionNew context:nil];
 }
@@ -81,8 +81,9 @@
     if ([keyPath isEqualToString:@"contentOffset"]) {
         
         CGFloat height = [change[@"new"] CGPointValue].y;
-        if (height > 0) {
+        if (height >= 0) {
             height = 0;
+            self.title = nil;
         }else if (height > -80){
             height = height/-80.0;
         }else{
@@ -95,7 +96,7 @@
                 
                 if (height == 1.0) {
                     self.title = @"释放刷新";
-                }else{
+                }else if(height > 0){
                     self.title = @"下拉刷新";
                 }
                 
