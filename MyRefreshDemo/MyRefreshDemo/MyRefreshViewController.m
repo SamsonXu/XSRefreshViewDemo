@@ -39,7 +39,7 @@
 @implementation MyRefreshViewController
 
 - (void)viewWillAppear:(BOOL)animated{
-    self.navigationController.navigationBar.hidden = YES;
+    
 }
 
 - (void)viewDidLoad {
@@ -50,6 +50,9 @@
 }
 
 - (void)createUI{
+    
+    self.title = @"导航栏";
+    self.navigationController.navigationBar.alpha = 0;
     self.view.backgroundColor = [UIColor grayColor];
      //默认值为yes，当视图中包含scrollView时，系统会自动调整scrollView的坐标，这里设置为NO
     self.automaticallyAdjustsScrollViewInsets = NO;
@@ -59,6 +62,9 @@
     self.tableView.delegate = self;
     self.tableView.dataSource = self;
     [self.view addSubview:self.tableView];
+    
+    //添加观察者，用来实现导航栏渐变效果
+    [self.tableView addObserver:self forKeyPath:@"contentOffset" options:NSKeyValueObservingOptionNew context:nil];
     
     [self setExtraCellLineHidden:self.tableView];
     
@@ -151,6 +157,20 @@
 
 }
 
+- (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary<NSKeyValueChangeKey,id> *)change context:(void *)context{
+    
+    if ([keyPath isEqualToString:@"contentOffset"]) {
+        CGFloat y = [change[@"new"] CGPointValue].y;
+        CGFloat alpha = 0;
+        if (y > 200) {
+            alpha = 1.0;
+        }else if (y > 0){
+            alpha = y/200.0;
+        }
+        self.navigationController.navigationBar.alpha = alpha;
+    }
+}
+
 - (void)setExtraCellLineHidden:(UITableView *)tableView{
     
     UIView *tempView = [[UIView alloc]init];
@@ -173,6 +193,10 @@
         [_headImageView sd_setImageWithURL:[NSURL URLWithString:ImgUrl]];
     }
     return _headImageView;
+}
+
+- (void)dealloc{
+    [self.tableView removeObserver:self forKeyPath:@"contentOffset"];
 }
 
 - (void)didReceiveMemoryWarning {
